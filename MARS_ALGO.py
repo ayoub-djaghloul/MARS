@@ -43,7 +43,7 @@ def generer_nom_fichier(file_path, prefix="embeddings_filtrés", extension=".txt
         i += 1
     return new_file_name
 
-#Version séquentielle de ma génération de voisins
+#Version séquentielle de ma génération de voisins   
 def generationvoisin(solution, l):
     unique_neighbors = set()  # Ensemble pour stocker des représentations uniques des voisins
     neighbors = []  # Liste pour stocker les voisins sous forme de listes
@@ -319,8 +319,8 @@ if __name__ == "__main__":
     start_time = time.time()
 
     file_path = sys.argv[1]
-    alpha = float(0.1)
-    beta = float(0.1)
+    alpha = 0.4  # Définir la valeur d'alpha souhaitée
+    beta = 0.5   # Définir la valeur de beta souhaitée
     l = int(sys.argv[2])
     epsilon = float(sys.argv[3])
     nbiter = int(sys.argv[4])
@@ -332,20 +332,15 @@ if __name__ == "__main__":
     print(numeric_embeddings)
     # Taille de la solution initiale basée sur la première entrée d'embedding
     n = len(numeric_embeddings[0])
-    alpha_range = np.arange(0.3, 0.8, 0.1)
-    beta_range = np.arange(0.3, 0.8, 0.1)
 
     # Génération d'une solution initiale aléatoire
     initial_solution = generationmasolutionaleatoire(n)
     # Vérification du nombre d'arguments passés
     if len(sys.argv) != 5:
-        print("Utilisation de cet algorithme: python grasp_junio(1).py <chemin_embeddings> <alpha> <beta> <l> <epsilon> <nbiter>")
+        print("Utilisation de cet algorithme: python grasp_junio(1).py <chemin_embeddings> <l> <epsilon> <nbiter>")
         sys.exit(1)
 
-for alpha in alpha_range:
-  for beta in beta_range:
     # Exécution de GRASP
-    start_time = time.time()
     solution, embeddings_filtrés = GRASP(numeric_embeddings, epsilon, beta, alpha, nbiter, l, initial_solution)
     temps_ecoule = time.time() - start_time
 
@@ -353,6 +348,7 @@ for alpha in alpha_range:
     meilleur_fitness = fitness(solution, numeric_embeddings, beta)
     print(f"Meilleure solution: {solution}, Fitness: {meilleur_fitness}, Temps écoulé: {temps_ecoule}")
     nouveau_fichier_embeddings = generer_nom_fichier(file_path)
+
     # Enregistrement des résultats dans un fichier CSV (facultatif)
     dimensionsup = n - sum(solution)
     file_exists = os.path.isfile('GRASP_Junior(version finale).csv')
@@ -364,45 +360,32 @@ for alpha in alpha_range:
          writer.writerow(['Fichier_Embeddings_Filtrés', 'Solution_optimale', 'Meilleur_fitness', 'Dimensions_depart', 'Nombre d\'éléments', 'Nombre_voisins', 'Nombre_itérations', 'epsilon', 'beta', 'alpha', 'Temps d\'exécution', 'Dimensions_supprimées'])
         writer.writerow([nouveau_fichier_embeddings, solution, meilleur_fitness, n, len(numeric_embeddings), l, nbiter, epsilon, beta, alpha, temps_ecoule, dimensionsup])
 
-
-
-    
-# Écriture des embeddings filtrés dans le nouveau fichier
+    # Écriture des embeddings filtrés dans le nouveau fichier
     with open(nouveau_fichier_embeddings, 'w') as f:
         for word, embed in embeddings_filtrés: 
             ligne = word + ' ' + ' '.join(map(str, embed))
             f.write(ligne + '\n')
 
-
     print(f"Les embeddings filtrés ont été sauvegardés dans {nouveau_fichier_embeddings}")
-
     wordvec = read_word_vectors(nouveau_fichier_embeddings)
     word_vecs.append(wordvec)
 
 
+
 word_sim_dir = "word-sim"
-alpha_range = np.arange(0.3, 0.8, 0.1)
-beta_range = np.arange(0.3, 0.8, 0.1)
-alpha=[alpha for alpha in alpha_range]
-beta=[beta for beta in beta_range]
+alpha = 0.4  # Définir la valeur d'alpha souhaitée
+beta = 0.5   # Définir la valeur de beta souhaitée
 
 table = PrettyTable()
-table.field_names = ["Serial", "Dataset-Name", "Num Pairs (WP)"]
-
-for j in range(1, 6):
-    for k in range(1, 6):
-        table.field_names.append(f"file avec : {alpha[j-1]} {beta[k-1]}")
-        table.align[f"file avec : {alpha[j-1] } {beta[k-1]}"] = "r"
-        table.valign[f"file avec : {alpha[j-1] } {beta[k-1]}"] = "m"
-
+table.field_names = ["Serial", "Dataset-Name", "Num Pairs (WP)"] +[f"file avec {alpha} et {beta}"] 
 
 for i, filename in enumerate(os.listdir(word_sim_dir)):
     manual_dict = {}
     rho_values = []
-
+    total_size = 0
     for word_vec in word_vecs:
         auto_dict = {}
-        total_size = 0
+        
         for line in open(os.path.join(word_sim_dir, filename), 'r'):
             line = line.strip().lower()
             word1, word2, val = line.split()
@@ -414,18 +397,15 @@ for i, filename in enumerate(os.listdir(word_sim_dir)):
         rho_values.append("{:.4f}".format(rho_value))
     
     # Ajouter une ligne au tableau
-    row_values = [i + 1, filename, total_size] + rho_values
+    row_values = [ 1, filename, total_size] + rho_values
     table.add_row(row_values)
     # Afficher le tableau
-print(table)
+    print(table)
 
-
-print(table)
-# Écriture des résultats dans le fichier CSV
+    # Écriture des résultats dans le fichier CSV
 with open(output_csv_file, mode='w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(table.field_names)  # Écriture de l'en-tête du tableau
-    for row in table.rows:
-        writer.writerow(row)
+        writer = csv.writer(file)
+        writer.writerow(table.field_names)  # Écriture de l'en-tête du tableau
+        writer.writerow(row_values)
 
 print(f"Les résultats du tableau ont été enregistrés dans {output_csv_file}")
