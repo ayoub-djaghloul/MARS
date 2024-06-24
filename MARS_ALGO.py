@@ -257,14 +257,14 @@ def load_embeddings(file_path):
             embeddings.append([float(value) for value in parts[1:]])  # Conserver l'embedding
     return words, embeddings
 
-# En supposant que `words` soit la liste des mots et `embeddings_filtrés` soit le résultat final de GRASP
+
 def associer_mots_embeddings(words, embeddings_filtrés):
     return [(word, embed) for word, embed in zip(words, embeddings_filtrés)]
 
 
 
 
-# Voici mon implémentation de la méthode GRASP
+
 def GRASP(embeddings, epsilon=0.1, beta=0.1, alpha=0.1, niter=100, l=1, initial_solution=None):
     if initial_solution is None:
         initial_solution = generationmasolutionaleatoire(len(embeddings[0]))
