@@ -8,12 +8,6 @@ import numpy as np
 from read_write import read_word_vectors
 from ranking import *
 from prettytable import PrettyTable
-#Vu les contraintes que je me suis mis sur le nombre de voisins,il faut y faire très attention
-#J'ai décidé de suivre à la lettre l'exemple du document
-#Les affichages pourraient être supprimés pour plus de performances...?
-#Attention à vous qui lisez ce commentaire,assurez-vous que les fichiers dans lequels vous écrivez ne sont pas ouverts lors de l'exécution du programme
-#Il semble que le nombre de répétitions augmente fortement le fitness
-# Extraction des arguments
 
 output_csv_file = 'resultats_tableau.csv'
 
